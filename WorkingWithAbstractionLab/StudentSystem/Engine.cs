@@ -15,37 +15,43 @@ namespace StudentSystem
 
         public void Process()
         {
-            var end = false;
-            
-            while (!end)
+            while (true)
             {
                 var line = this.inputOutputProvider.GetInput();
 
                 var command = Command.Parse(line);
-                var commandName = command.Name;
-                var arguments = command.Arguments;
 
-                switch (commandName)
-                {
-                    case "Create":
-                        var name = arguments[0];
-                        var age = int.Parse(arguments[1]);
-                        var grade = double.Parse(arguments[2]);
-                        this.studentData.Create(name, age, grade);
-                        break;
+                var end = this.ExecuteCommand(command);
 
-                    case "Show":
-                        var studentName = arguments[0];
-                        var details = this.studentData.GetDetails(studentName);
-                        this.inputOutputProvider.ShowOutput(details);
-                        break;
-
-                    case "Exit":
-                        end = true;
-                        break;
-
-                }
+                if (end) break;
             }
+        }
+
+        private bool ExecuteCommand(Command command)
+        {
+            var commandName = command.Name;
+            var arguments = command.Arguments;
+
+            switch (commandName)
+            {
+                case "Create":
+                    var name = arguments[0];
+                    var age = int.Parse(arguments[1]);
+                    var grade = double.Parse(arguments[2]);
+                    this.studentData.Create(name, age, grade);
+                    break;
+
+                case "Show":
+                    var studentName = arguments[0];
+                    var details = this.studentData.GetDetails(studentName);
+                    this.inputOutputProvider.ShowOutput(details);
+                    break;
+
+                case "Exit":
+                    return true;
+            }
+
+            return false;
         }
     }
 }
