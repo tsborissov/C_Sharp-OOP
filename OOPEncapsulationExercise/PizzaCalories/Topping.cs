@@ -4,20 +4,20 @@ namespace PizzaCalories
 {
     public class Topping
     {
-        private string type;
+        private string name;
         private double weight;
 
-        public Topping(string type, double weight)
+        public Topping(string name, double weight)
         {
-            this.Type = type;
+            this.Name = name;
             this.Weight = weight;
         }
 
-        public string Type
+        public string Name
         { 
             get
             {
-                return this.type;
+                return this.name;
             }
             private set
             {
@@ -26,7 +26,7 @@ namespace PizzaCalories
                     throw new ArgumentException($"Cannot place {value} on top of your pizza.");
                 }
 
-                this.type = value;
+                this.name = value;
             }
         }
         public double Weight
@@ -39,7 +39,7 @@ namespace PizzaCalories
             {
                 if (value < 1 || value > 50)
                 {
-                    throw new ArgumentException($"{this.Type} weight should be in the range[1..50].");
+                    throw new ArgumentException($"{this.Name} weight should be in the range [1..50].");
                 }
 
                 this.weight = value;
@@ -48,7 +48,7 @@ namespace PizzaCalories
 
         public double CalculateToppingCallories()
         {
-            double toppingModifier = (int)Enum.Parse(typeof(ToppingModifiers), this.Type, true) * 1.0 / 10;
+            double toppingModifier = (int)Enum.Parse(typeof(ToppingModifiers), this.Name, true) * 1.0 / 10;
 
             return 2 * this.Weight * toppingModifier;
         }

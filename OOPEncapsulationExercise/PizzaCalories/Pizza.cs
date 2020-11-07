@@ -26,7 +26,7 @@ namespace PizzaCalories
             }
             private set
             {
-                if (string.IsNullOrWhiteSpace(value) || value.Length > 15)
+                if (value.Length < 1 || value.Length > 15)
                 {
                     throw new ArgumentException("Pizza name should be between 1 and 15 symbols.");
                 }
