@@ -24,42 +24,49 @@ namespace WildFarm.Core
         {
             List<Animal> animals = new List<Animal>();
             
-            int i = 0;
-
             Animal currentAnimal = null;
 
-            string command;
-            while ((command = Console.ReadLine()) != "End")
+            while (true)
             {
-                string[] cmdArgs = command
+                if (currentAnimal != null)
+                {
+                    animals.Add(currentAnimal);
+                }
+                
+                try
+                {
+                    string input = Console.ReadLine();
+
+                    if (input == "End")
+                    {
+                        break;
+                    }
+
+                    string[] animalDetails = input
                     .Split(' ', StringSplitOptions.RemoveEmptyEntries)
                     .ToArray();
 
-                try
-                {
-                    if (i % 2 == 0)
-                    {
-                        currentAnimal = animalFactory.CreateAnimal(cmdArgs);
-                    }
-                    else
-                    {
-                        string foodType = cmdArgs[0];
-                        int quantity = int.Parse(cmdArgs[1]);
+                    currentAnimal = animalFactory.CreateAnimal(animalDetails);
 
-                        Food currentFood = foodFactory.CreateFood(foodType, quantity);
+                    input = Console.ReadLine();
 
-                        Console.WriteLine(currentAnimal.ProduceSound());
-                        currentAnimal.Feed(currentFood);
-                        animals.Add(currentAnimal);
-                    }
+                    string[] foodDetails = input
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .ToArray();
+
+                    string foodType = foodDetails[0];
+                    int quantity = int.Parse(foodDetails[1]);
+
+                    Food currentFood = foodFactory.CreateFood(foodType, quantity);
+
+                    Console.WriteLine(currentAnimal.ProduceSound());
+                    currentAnimal.Feed(currentFood);
                 }
                 catch (Exception ex)
                 {
-                    animals.Add(currentAnimal);
+                    
                     Console.WriteLine(ex.Message);
                 }
-
-                i++;
             }
 
             foreach (var animal in animals)
