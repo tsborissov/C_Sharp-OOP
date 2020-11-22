@@ -14,6 +14,7 @@ namespace CommandPattern
 
             string commandType = inputTokens[0];
             string[] commandArguments = inputTokens.Skip(1).ToArray();
+            
             string result = string.Empty;
             //ICommand command = null;
 
@@ -22,11 +23,8 @@ namespace CommandPattern
                 .GetTypes()
                 .FirstOrDefault(x => x.Name.StartsWith(commandType));
 
-            if (type != null)
-            {
                 ICommand instance = (ICommand)Activator.CreateInstance(type);
-                result = instance.Execute(commandArguments);
-            }
+                result = instance?.Execute(commandArguments) ?? "Invalid command.";
 
             //if (commandType == "Hello")
             //{
