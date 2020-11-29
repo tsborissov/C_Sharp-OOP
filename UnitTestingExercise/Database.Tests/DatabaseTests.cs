@@ -1,18 +1,19 @@
 using NUnit.Framework;
 using System;
+using Database;
 
 namespace Tests
 {
     public class DatabaseTests
     {
-        private Database database;
+        private Database.Database database;
         private readonly int[] initialData = new int[] { 1, 2 };
         private const int DATABASE_CAPACITY = 16;
 
         [SetUp]
         public void Setup()
         {
-            this.database = new Database(initialData);
+            this.database = new Database.Database(initialData);
         }
 
         [Test]
@@ -21,7 +22,7 @@ namespace Tests
         
         public void TestIfConstructorWorksCorrectly(int[] data)
         {
-            this.database = new Database(data);
+            this.database = new Database.Database(data);
 
             int expectedCount = data.Length;
             int actualCount = this.database.Count;
@@ -34,7 +35,7 @@ namespace Tests
         {
             int[] data = new int[DATABASE_CAPACITY + 1];
 
-            Assert.Throws<InvalidOperationException>(() => this.database = new Database(data));
+            Assert.Throws<InvalidOperationException>(() => this.database = new Database.Database(data));
         }
 
         [Test]
@@ -53,7 +54,7 @@ namespace Tests
         {
             int[] data = new int[DATABASE_CAPACITY];
 
-            this.database = new Database(data);
+            this.database = new Database.Database(data);
 
             Assert.Throws<InvalidOperationException>(() => database.Add(17));
         }
@@ -85,7 +86,7 @@ namespace Tests
         [TestCase(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})]
         public void FetchShouldReturnCopyOfData(int[] expectedData)
         {
-            this.database = new Database(expectedData);
+            this.database = new Database.Database(expectedData);
 
             int[] actualData = this.database.Fetch();
 

@@ -1,5 +1,6 @@
 using System;
 using NUnit.Framework;
+using ExtendedDatabase;
 
 namespace Tests
 {
@@ -7,7 +8,7 @@ namespace Tests
     {
         private Person person;
         private Person[] persons;
-        private ExtendedDatabase database;
+        private ExtendedDatabase.ExtendedDatabase database;
         private const int DATABASE_CAPACITY = 16;
 
         
@@ -21,7 +22,7 @@ namespace Tests
                 this.persons[i] = new Person(i + 1, $"username{i + 1}");
             }
 
-            this.database = new ExtendedDatabase(persons);
+            this.database = new ExtendedDatabase.ExtendedDatabase(persons);
         }
 
         [Test]
@@ -51,7 +52,7 @@ namespace Tests
         [Test]
         public void TestDatabaseConstructorWithEmptyData()
         {
-            this.database = new ExtendedDatabase();
+            this.database = new ExtendedDatabase.ExtendedDatabase();
 
             int expectedCount = 0;
             int actualCount = this.database.Count;
@@ -62,7 +63,7 @@ namespace Tests
         [Test]
         public void AddShouldIncreaseCountWhenAddedSuccessfully()
         {
-            this.database = new ExtendedDatabase();
+            this.database = new ExtendedDatabase.ExtendedDatabase();
             this.database.Add(new Person(1, "user1"));
 
             int expectedCount = 1;
@@ -80,7 +81,7 @@ namespace Tests
         [Test]
         public void AddUserWithSameUsernameShouldThrowException()
         {
-            this.database = new ExtendedDatabase();
+            this.database = new ExtendedDatabase.ExtendedDatabase();
             this.database.Add(new Person(1, "username"));
 
             Assert.Throws<InvalidOperationException>(() => this.database.Add(new Person(2, "username")));
@@ -89,7 +90,7 @@ namespace Tests
         [Test]
         public void AddUserWithSameIdShouldThrowException()
         {
-            this.database = new ExtendedDatabase();
+            this.database = new ExtendedDatabase.ExtendedDatabase();
             this.database.Add(new Person(1, "username"));
 
             Assert.Throws<InvalidOperationException>(() => this.database.Add(new Person(1, "anotherUsername")));
