@@ -60,7 +60,11 @@ namespace Chainblock.Core
 
         public IEnumerable<ITransaction> GetAllOrderedByAmountDescendingThenById()
         {
-            return this.OrderByDescending(tr => tr.Amount).ThenBy(tr => tr.Id);
+            IEnumerable<ITransaction> targetTransactions = this.transactions
+                .OrderByDescending(tr => tr.Amount)
+                .ThenBy(tr => tr.Id);
+
+            return targetTransactions;
         }
 
         public IEnumerable<string> GetAllReceiversWithTransactionStatus(TransactionStatus status)
@@ -105,27 +109,68 @@ namespace Chainblock.Core
 
         public IEnumerable<ITransaction> GetByReceiverAndAmountRange(string receiver, double lo, double hi)
         {
-            throw new NotImplementedException();
+            IEnumerable<ITransaction> targetTransactions = this.transactions
+                .Where(tr => tr.To == receiver)
+                .Where(tr => tr.Amount >= lo)
+                .Where(tr => tr.Amount < hi)
+                .OrderByDescending(tr => tr.Amount)
+                .ThenBy(tr => tr.Id);
+
+            if (!targetTransactions.Any())
+            {
+                throw new InvalidOperationException(ExceptionMessages.EmptyGetByReceiverAndAmountRangeMessage);
+            }
+
+            return targetTransactions;
         }
 
         public IEnumerable<ITransaction> GetByReceiverOrderedByAmountThenById(string receiver)
         {
-            throw new NotImplementedException();
+            IEnumerable<ITransaction> targetTransactions = this.transactions
+                .Where(tr => tr.To == receiver)
+                .OrderByDescending(tr => tr.Amount)
+                .ThenBy(tr => tr.Id);
+
+            if (!targetTransactions.Any())
+            {
+                throw new InvalidOperationException(ExceptionMessages.EmptyGetByReceiverOrderedByAmountThenByIdMessage);
+            }
+
+            return targetTransactions;
         }
 
         public IEnumerable<ITransaction> GetBySenderAndMinimumAmountDescending(string sender, double amount)
         {
-            throw new NotImplementedException();
+            IEnumerable<ITransaction> targetTransactions = this.transactions
+                .Where(tr => tr.From == sender)
+                .Where(tr => tr.Amount > amount)
+                .OrderByDescending(tr => tr.Amount);
+
+            if (!targetTransactions.Any())
+            {
+                throw new InvalidOperationException(ExceptionMessages.EmptyGetBySenderAndMinimumAmountDescendingMessage);
+            }
+
+            return targetTransactions;
         }
 
         public IEnumerable<ITransaction> GetBySenderOrderedByAmountDescending(string sender)
         {
-            throw new NotImplementedException();
+            IEnumerable<ITransaction> targetTransactions = this.transactions
+                .Where(tr => tr.From == sender)
+                .OrderByDescending(tr => tr.Amount);
+
+            if (!targetTransactions.Any())
+            {
+                throw new InvalidOperationException(ExceptionMessages.EmptyGetBySenderOrderedByAmountDescendingMessage);
+            }
+
+            return targetTransactions;
         }
 
         public IEnumerable<ITransaction> GetByTransactionStatus(TransactionStatus status)
         {
-            IEnumerable<ITransaction> targetTransactions = transactions
+            IEnumerable<ITransaction> targetTransactions = this.transactions
                 .Where(tr => tr.Status == status)
                 .OrderByDescending(tr => tr.Amount);
 
@@ -139,7 +184,12 @@ namespace Chainblock.Core
 
         public IEnumerable<ITransaction> GetByTransactionStatusAndMaximumAmount(TransactionStatus status, double amount)
         {
-            throw new NotImplementedException();
+            IEnumerable<ITransaction> targetTransactions = this.transactions
+                .Where(tr => tr.Status == status)
+                .Where(tr => tr.Amount <= amount)
+                .OrderByDescending(tr => tr.Amount);
+
+            return targetTransactions;
         }
 
         public IEnumerator<ITransaction> GetEnumerator()

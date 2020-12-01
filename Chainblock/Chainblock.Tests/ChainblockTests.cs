@@ -385,7 +385,51 @@ namespace Chainblock.Tests
         [Test]
         public void GetAllOrderedByAmountDescendingThenByIdShouldReturnTransactionsCollection()
         {
+            ICollection<ITransaction> expectedTransactions = new List<ITransaction>();
+            ICollection<ITransaction> actualTransactions = new List<ITransaction>();
+
             for (int i = 0; i < 7; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                expectedTransactions.Add(currentTransaction);
+                chainblock.Add(currentTransaction);
+            }
+
+            expectedTransactions = expectedTransactions.OrderByDescending(tr => tr.Amount).ThenBy(tr => tr.Id).ToList();
+
+            actualTransactions = chainblock.GetAllOrderedByAmountDescendingThenById().ToList();
+
+            CollectionAssert.AreEqual(expectedTransactions, actualTransactions);
+        }
+
+        [Test]
+        public void TestGetBySenderOrderedByAmountDescending()
+        {
+            ICollection<ITransaction> expectedTransactions = new List<ITransaction>();
+            ICollection<ITransaction> actualTransactions = new List<ITransaction>();
+
+            for (int i = 0; i < 3; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                expectedTransactions.Add(currentTransaction);
+                this.chainblock.Add(currentTransaction);
+            }
+
+            for (int i = 3; i < 7; i++)
             {
                 int id = TEST_ID + i;
                 TransactionStatus status = (TransactionStatus)(i / 2);
@@ -398,13 +442,349 @@ namespace Chainblock.Tests
                 chainblock.Add(currentTransaction);
             }
 
-            IEnumerable<ITransaction> expectedTransactions = chainblock
-                .OrderByDescending(tr => tr.Amount)
-                .ThenBy(tr => tr.Id);
-
-            IEnumerable<ITransaction> actualTransactions = chainblock.GetAllOrderedByAmountDescendingThenById();
+            expectedTransactions = expectedTransactions.OrderByDescending(tr => tr.Amount).ToList();
+            actualTransactions = this.chainblock.GetBySenderOrderedByAmountDescending(TEST_SENDER).ToList();
 
             CollectionAssert.AreEqual(expectedTransactions, actualTransactions);
         }
+
+        [Test]
+        public void EmptyGetBySenderOrderedByAmountDescendingShouldThrowException()
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                this.chainblock.Add(currentTransaction);
+            }
+
+            Assert.Throws<InvalidOperationException>(() =>
+            this.chainblock.GetBySenderOrderedByAmountDescending(TEST_SENDER),
+            ExceptionMessages.EmptyGetBySenderOrderedByAmountDescendingMessage);
+        }
+
+        [Test]
+        public void TestGetByReceiverOrderedByAmountThenByIdShouldReturnOrderedCollection()
+        {
+            ICollection<ITransaction> expectedTransactions = new List<ITransaction>();
+            ICollection<ITransaction> actualTransactions = new List<ITransaction>();
+
+            for (int i = 0; i < 3; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                expectedTransactions.Add(currentTransaction);
+                this.chainblock.Add(currentTransaction);
+            }
+
+            for (int i = 3; i < 7; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                chainblock.Add(currentTransaction);
+            }
+
+            expectedTransactions = expectedTransactions.OrderByDescending(tr => tr.Amount).ThenBy(tr => tr.Id).ToList();
+            actualTransactions = this.chainblock.GetByReceiverOrderedByAmountThenById(TEST_RECEPIENT).ToList();
+
+            CollectionAssert.AreEqual(expectedTransactions, actualTransactions);
+        }
+
+        [Test]
+        public void EmptyGetByReceiverOrderedByAmountThenByIdShouldThrowException()
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                this.chainblock.Add(currentTransaction);
+            }
+
+            Assert.Throws<InvalidOperationException>(() =>
+            this.chainblock.GetByReceiverOrderedByAmountThenById(TEST_RECEPIENT),
+            ExceptionMessages.EmptyGetByReceiverOrderedByAmountThenByIdMessage);
+        }
+
+        [Test]
+        [TestCase(TransactionStatus.Failed, 0)]
+        [TestCase(TransactionStatus.Failed, 19)]
+        [TestCase(TransactionStatus.Failed, 21)]
+        [TestCase(TransactionStatus.Failed, 30)]
+        [TestCase(TransactionStatus.Successfull, 0)]
+        [TestCase(TransactionStatus.Successfull, 19)]
+        [TestCase(TransactionStatus.Successfull, 21)]
+        [TestCase(TransactionStatus.Successfull, 30)]
+        [TestCase(TransactionStatus.Aborted, 0)]
+        [TestCase(TransactionStatus.Aborted, 19)]
+        [TestCase(TransactionStatus.Aborted, 21)]
+        [TestCase(TransactionStatus.Aborted, 30)]
+        [TestCase(TransactionStatus.Unauthorized, 0)]
+        [TestCase(TransactionStatus.Unauthorized, 19)]
+        [TestCase(TransactionStatus.Unauthorized, 21)]
+        [TestCase(TransactionStatus.Unauthorized, 30)]
+        public void TestGetByTransactionStatusAndMaximumAmountShouldReturnOrderedByAmountCollection(TransactionStatus transactionStatus, double targetAmount)
+        {
+            ICollection<ITransaction> expectedTransactions = new List<ITransaction>();
+            ICollection<ITransaction> actualTransactions = new List<ITransaction>();
+
+            for (int i = 0; i < 3; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = transactionStatus;
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                expectedTransactions.Add(currentTransaction);
+                this.chainblock.Add(currentTransaction);
+            }
+
+            for (int i = 3; i < 7; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                if (status == transactionStatus)
+                {
+                    expectedTransactions.Add(currentTransaction);
+                }
+
+                chainblock.Add(currentTransaction);
+            }
+
+            expectedTransactions = expectedTransactions
+                .Where(tr => tr.Status == transactionStatus)
+                .Where(tr => tr.Amount <= targetAmount)
+                .OrderByDescending(tr => tr.Amount)
+                .ToList();
+
+            actualTransactions = this.chainblock
+                .GetByTransactionStatusAndMaximumAmount(transactionStatus, targetAmount)
+                .ToList();
+
+            CollectionAssert.AreEqual(expectedTransactions, actualTransactions);
+        }
+
+        [Test]
+        [TestCase(0)]
+        [TestCase(5)]
+        [TestCase(10)]
+        public void TestGetBySenderAndMinimumAmountDescendingShouldReturnOrderedCollection(double targetAmount)
+        {
+            ICollection<ITransaction> expectedTransactions = new List<ITransaction>();
+            ICollection<ITransaction> actualTransactions = new List<ITransaction>();
+
+            for (int i = 0; i < 3; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+                
+                if (amount > targetAmount)
+                {
+                    expectedTransactions.Add(currentTransaction);
+                }
+                
+                this.chainblock.Add(currentTransaction);
+            }
+
+            for (int i = 3; i < 7; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                chainblock.Add(currentTransaction);
+            }
+
+            expectedTransactions = expectedTransactions
+                .Where(tr => tr.Amount > targetAmount)
+                .OrderByDescending(tr => tr.Amount)
+                .ToList();
+
+
+            actualTransactions = this.chainblock
+                .GetBySenderAndMinimumAmountDescending(TEST_SENDER, targetAmount)
+                .ToList();
+
+            CollectionAssert.AreEqual(expectedTransactions, actualTransactions);
+        }
+
+        [Test]
+        public void EmptyGetBySenderAndMinimumAmountDescendingNoSuchSenderShouldThrowException()
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                this.chainblock.Add(currentTransaction);
+            }
+
+            Assert.Throws<InvalidOperationException>(() =>
+            this.chainblock.GetBySenderAndMinimumAmountDescending(TEST_SENDER, TEST_AMOUNT),
+            ExceptionMessages.EmptyGetBySenderAndMinimumAmountDescendingMessage);
+        }
+
+        [Test]
+        [TestCase(TEST_AMOUNT + 8)]
+        public void EmptyGetBySenderAndMinimumAmountDescendingNoSuchAmountShouldThrowException(double targetAmount)
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                this.chainblock.Add(currentTransaction);
+            }
+
+            Assert.Throws<InvalidOperationException>(() =>
+            this.chainblock.GetBySenderAndMinimumAmountDescending(TEST_SENDER, targetAmount),
+            ExceptionMessages.EmptyGetBySenderAndMinimumAmountDescendingMessage);
+        }
+
+        [Test]
+        [TestCase(TEST_RECEPIENT, 0, 20)]
+        [TestCase(TEST_RECEPIENT, 15, 17)]
+        public void TestGetByReceiverAndAmountRangeShouldReturnCollection(string receiver, double lo, double hi)
+        {
+            ICollection<ITransaction> expectedTransactions = new List<ITransaction>();
+            ICollection<ITransaction> actualTransactions = new List<ITransaction>();
+
+            for (int i = 0; i < 3; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                expectedTransactions.Add(currentTransaction);
+                this.chainblock.Add(currentTransaction);
+            }
+
+            for (int i = 3; i < 7; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                chainblock.Add(currentTransaction);
+            }
+
+            expectedTransactions = expectedTransactions
+                .Where(tr => tr.Amount >= lo)
+                .Where(tr => tr.Amount < hi)
+                .OrderByDescending(tr => tr.Amount)
+                .ThenBy(tr => tr.Id)
+                .ToList();
+
+
+            actualTransactions = this.chainblock
+                .GetByReceiverAndAmountRange(TEST_RECEPIENT, lo, hi)
+                .ToList();
+
+            CollectionAssert.AreEqual(expectedTransactions, actualTransactions);
+        }
+
+        [Test]
+        [TestCase(15, 18)]
+        public void EmptyGetByReceiverAndAmountRangeNoSuchReceiverShouldThrowException(double lo, double hi)
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}{i}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                this.chainblock.Add(currentTransaction);
+            }
+
+            Assert.Throws<InvalidOperationException>(() =>
+            this.chainblock.GetByReceiverAndAmountRange(TEST_RECEPIENT, lo, hi),
+            ExceptionMessages.EmptyGetByReceiverAndAmountRangeMessage);
+        }
+
+        [Test]
+        [TestCase(100, 200)]
+        public void EmptyGetByReceiverAndAmountRangeNoSuchAmountShouldThrowException(double lo, double hi)
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                int id = TEST_ID + i;
+                TransactionStatus status = (TransactionStatus)(i / 2);
+                string sender = $"{TEST_SENDER}{i}";
+                string recepient = $"{TEST_RECEPIENT}";
+                double amount = TEST_AMOUNT + i;
+
+                Transaction currentTransaction = new Transaction(id, status, sender, recepient, amount);
+
+                this.chainblock.Add(currentTransaction);
+            }
+
+            Assert.Throws<InvalidOperationException>(() =>
+            this.chainblock.GetByReceiverAndAmountRange(TEST_RECEPIENT, lo, hi),
+            ExceptionMessages.EmptyGetByReceiverAndAmountRangeMessage);
+        }
+
     }
 }

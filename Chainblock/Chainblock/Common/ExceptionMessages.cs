@@ -27,6 +27,14 @@ namespace Chainblock.Common
         public static string GetAllSendersWithTransactionStatusNotExistingStatus = "No transactions with provided status!";
 
         public static string GetAllReceiversWithTransactionStatusNotExistingStatus = "No transactions with provided status!";
+        
+        public static string EmptyGetBySenderOrderedByAmountDescendingMessage = "No transactions for the given sender found!";
+        
+        public static string EmptyGetByReceiverOrderedByAmountThenByIdMessage = "No transactions for the given receiver found!";
+        
+        public static string EmptyGetBySenderAndMinimumAmountDescendingMessage = "No transactions found!";
+        
+        public static string EmptyGetByReceiverAndAmountRangeMessage = "No transactions found!";
 
 
 
